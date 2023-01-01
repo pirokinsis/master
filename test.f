@@ -18,7 +18,6 @@ C      Write( *, * ) 'Line at a time'
 C           Write(  *, * ) a( i, : )
       End Do
 
-      Write (*,*) a
       Close( 10 )
 
       end program main 

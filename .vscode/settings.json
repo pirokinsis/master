@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "tuple": "cpp",
+        "alignedvector3": "cpp",
+        "complex": "cpp",
+        "iostream": "cpp"
+    }
+}

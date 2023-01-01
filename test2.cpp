@@ -23,8 +23,9 @@ int main()
 {
 Matrix2d a=Matrix2d::Random();
 Matrix2d b=Matrix2d::Random();
-Matrix2d Y=Solve2dSyl(a,b);
 cout<<a<<endl<<b<<endl<< a*Y+Y*a.transpose();
+
+
 }
 
 
