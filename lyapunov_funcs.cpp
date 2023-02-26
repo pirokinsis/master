@@ -339,10 +339,10 @@ tuple<MatrixXd, VectorXd, int> ComputeGradient(MatrixXd Sigma, MatrixXd B, Vecto
             return make_tuple(B, C, 2);
     }
 
-    cout<<"f old:"<< f_old<<" l1: "<<lambda*B.norm()<<" Lambda: "<<lambda<<"   B norm: "<<B.norm()<<"  C norm"<<C.norm()<<endl;
-    cout<<"B old norm: "<<B_old.norm()<<endl;
-    cout<<"f new:"<<f<<" number of steps "<<counter<<" step_b counter:"<<counter<<endl;
-    cout<<"#############################################################################"<<endl;
+    // cout<<"f old:"<< f_old<<" l1: "<<lambda*B.norm()<<" Lambda: "<<lambda<<"   B norm: "<<B.norm()<<"  C norm"<<C.norm()<<endl;
+    // cout<<"B old norm: "<<B_old.norm()<<endl;
+    // cout<<"f new:"<<f<<" number of steps "<<counter<<" step_b counter:"<<counter<<endl;
+    // cout<<"#############################################################################"<<endl;
     return make_tuple(B, C, 0);
 }
 
