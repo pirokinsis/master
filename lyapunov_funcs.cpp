@@ -249,7 +249,7 @@ tuple<double, MatrixXd, VectorXd> LassoGradient(MatrixXd Sigma, MatrixXd B, Vect
     return make_tuple(f, grad_B, grad_C);
 }
 
-tuple<MatrixXd, VectorXd, int> ComputeGradient(MatrixXd Sigma, MatrixXd B, VectorXd C, int n, double alpha, double lambda, double lambda2, double kappa, MatrixXd &active_vars, double min_change, int max_steps, bool fitch_or_verando)
+tuple<MatrixXd, VectorXd, int> ComputeGradient(MatrixXd Sigma, MatrixXd B, VectorXd C, int n, double alpha, double lambda, double lambda2, double kappa, MatrixXd active_vars, double min_change, int max_steps, bool fitch_or_verando)
 {
 
     if (active_vars.cols() == 0)
@@ -268,9 +268,9 @@ tuple<MatrixXd, VectorXd, int> ComputeGradient(MatrixXd Sigma, MatrixXd B, Vecto
         tie(f, grad_B, grad_C) = ForbeniusLossGradient(Sigma, B, C, n, lambda, lambda2, kappa, active_vars);
     else
         tie(f, grad_B, grad_C) = LassoGradient(Sigma, B, C, n, lambda, lambda2, kappa, active_vars);
-
-
-
+    
+    grad_B=grad_B.cwiseProduct(active_vars);
+    
     double step = 1;
     if (!fitch_or_verando) step=0.01;
     double step_B = 1;
@@ -339,13 +339,14 @@ tuple<MatrixXd, VectorXd, int> ComputeGradient(MatrixXd Sigma, MatrixXd B, Vecto
             return make_tuple(B, C, 2);
     }
 
-    // cout<<"f old:"<< f_old<<" l1: "<<lambda*B.norm()<<" Lambda: "<<lambda<<"   B norm: "<<B.norm()<<"  C norm"<<C.norm()<<endl;
-    // cout<<"B old norm: "<<B_old.norm()<<endl;
-    // cout<<"f new:"<<f<<" number of steps "<<counter<<" step_b counter:"<<counter<<endl;
-    // cout<<"#############################################################################"<<endl;
+    cout<<"f old:"<< f_old<<" l1: "<<lambda*B.norm()<<" Lambda: "<<lambda<<"   B norm: "<<B.norm()<<"  C norm"<<C.norm()<<endl;
+    cout<<"B old norm: "<<B_old.norm()<<endl;
+    cout<<"f new:"<<f<<" number of steps "<<counter<<" step_b counter:"<<counter<<endl;
+    cout<<"#############################################################################"<<endl;
     return make_tuple(B, C, 0);
 }
-tuple<MatrixXd, VectorXd, int> FitLyapunov(MatrixXd Sigma, MatrixXd B, VectorXd C, int n, double alpha, double lambda, double lambda2, double kappa, MatrixXd &active_vars, double min_change, int max_steps, bool fitch_or_verando, int max_decent)
+
+tuple<MatrixXd, VectorXd, int> FitLyapunov(MatrixXd Sigma, MatrixXd B, VectorXd C, int n, double alpha, double lambda, double lambda2, double kappa, MatrixXd active_vars, double min_change, int max_steps, bool fitch_or_verando, int max_decent)
 {
     int converge_flag = 0;
     int count = 0;
@@ -363,18 +364,20 @@ tuple<MatrixXd, VectorXd, int> FitLyapunov(MatrixXd Sigma, MatrixXd B, VectorXd 
     return make_tuple(B_new, C_new, converge_flag);
 }
 
-MatrixXd Generate_A_Matrix(MatrixXd active_vars, MatrixXd Sigma, int n)
+MatrixXd Generate_A_Matrix(MatrixXd active_vars, MatrixXd Sigma, int n,bool diagonal_c)
 {
-    MatrixXd output = MatrixXd::Zero(n * (n + 1) / 2, active_vars.sum());
+    MatrixXd output;
+    if (!diagonal_c)  output= MatrixXd::Zero(n * (n + 1) / 2, active_vars.sum());
+    else output = MatrixXd::Zero(n * (n + 1) / 2, (int)active_vars.sum()+n-1);
     int col = 0;
     int row = 0;
     for (int k = 0; k < n; k++)
         for (int l = k; l < n; l++)
         {
-            row = 0;
+            col = 0;
             for (int i = 0; i < n; i++)
                 for (int j = 0; j < n; j++)
-                    if (active_vars(i, j) != 0)
+                    if (active_vars(j,i) != 0)
                     {
                         if ((j == l) && (j == k))
                             output(row, col) = 2 * Sigma(j, i);
@@ -382,9 +385,26 @@ MatrixXd Generate_A_Matrix(MatrixXd active_vars, MatrixXd Sigma, int n)
                             output(row, col) = Sigma(k, i);
                         else if (j == k)
                             output(row, col) = Sigma(l, i);
-                        row++;
+                        col++;
                     }
-            col++;
+            row++;
         }
+    if (diagonal_c)
+    {
+        row=0;
+        col=0;
+        for (int k = 0; k < n; k++)
+            for (int l = k; l < n; l++)
+            {
+                if ((k==l) && (k!=0))
+                {
+
+                    output(row,(int)active_vars.sum()+col)=-1;
+                    col++;
+                }
+                row++;
+            }
+
+    }
     return output;
 }

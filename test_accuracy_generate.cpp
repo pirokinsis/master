@@ -18,10 +18,10 @@ using Eigen::RealSchur;
 
 int main()
 {
-srand((unsigned int) 1000);
+srand((unsigned int) 5461);
 ofstream myfile("data.txt");
 ofstream myfile_error("failed_to_converge.txt");
-for (int k=0;k<10000;k++ )
+for (int k=237;k<10000;k++ )
 {
     
     cout<<"RUN NUMBER: "<<k<<endl;
